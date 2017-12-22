@@ -1,2 +1,2 @@
 # windows
-A collection of useful scripts and notes
+A collection of hopefully useful scripts and notes
