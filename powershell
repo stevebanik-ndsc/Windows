@@ -1,0 +1,325 @@
+# get all attributes for username
+dsquery * -filter "(samaccountname=username)" -attr *
+
+# display all the groups a user is a member of in active directory aka ad aka aduc
+dsget user "CN=User Name,CN=users,dc=companyname,dc=pod04,dc=cloudprovider,dc=com" -memberof -expand
+
+# display all active users
+dsquery * -filter "(&(objectCategory=person)(objectClass=user)(!userAccountControl:1.2.840.113556.1.4.803:=2))"
+
+# display the SID of a user
+dsquery user -samid username | dsget user -sid
+
+# get the SID of all users
+dsquery user | dsget user -samid -sid
+
+# get the last logon timestamp for all users
+dsquery * -filter "&(objectClass=person)(objectCategory=user)" -attr cn lastLogonTimestamp -limit 0
+
+# convert the date/time values with w32tm.exe but this seems to display a wrong timestamp
+w32tm.exe /ntte 131564425020178660
+
+# display member status given a group name
+dsquery group -samid “companyname-Standard” | dsget group -members | dsget user -disabled -display
+
+# display DNS host name, the site name, and whether the server is Global Catalog (GC) server for each domain controller
+dsquery server | dsget server -dnsname -site -isgc
+
+# open DSQUERY GUI Window
+rundll32 dsquery,OpenQueryWindow
+
+# when was the object changed?
+dsquery * -filter "(samaccountname=username)" -attr name whenchanged
+
+# curl test for RC LB
+curl -vvv -k --header “Host: foo.bar.org” https://172.21.218.174:9010/Account/Login
+
+# get AZ for a machine
+invoke-restmethod http://169.254.169.254/latest/meta-data/placement/availability-zone
+
+# set a secure password file and read it in
+Read-Host -AsSecureString | ConvertFrom-SecureString | Out-File -FilePath c:\users\username\emailpassword.txt
+New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList "username@nationaldecisionsupport.com",(Get-Content -Path username@myisp.net.securestring | ConvertTo-SecureString)
+
+# using the largest int32 positive integer, calculate the factorial to generate 100% CPU utilization 
+# use this to run a CPU stress test which will generate heat and cause your laptop fan to run high
+# use this on cold days to turn your laptop into a Jackman heater 
+$result = 1; foreach ($number in 1..2147483647) {$result = $result * $number};
+
+# reboot one machine
+C:\DeployTools\PSTools\psshutdown.exe \\companyname-ADMIN -r -e p:2:3
+
+# display event id 4625 "an account failed to log on" starting from this time yesterday up to an hour ago
+Get-WinEvent -FilterHashTable @{LogName="Security"; StartTime=(get-date).AddDays(-1); EndTime=(get-date).AddHours(-1); ID=4625} |fl *
+
+# display event id 4625 "an account failed to log on" in archived event viewer files
+Get-WinEvent -ComputerName localhost -FilterHashtable @{Path="C:\Windows\System32\winevt\Logs\Archive-Security-2017-09-*.evtx";Id="4625"} | Format-Table -wrap >> failed_september_2017_logins.txt
+
+# delete Terminal Server Client *.bin files
+$users = Get-ChildItem -Path "C:\Users"
+$users | ForEach-Object { Remove-Item "c:\users\$($_.Name)\AppData\Local\Microsoft\Terminal Server Client\Cache\Cache000?.bin" }
+
+# list updates (hotfixes) from companynameBUILD
+Get-HotFix -Description "Security*" -ComputerName "companyname-DEV-IIS"
+Get-HotFix -Description "Security*" -ComputerName "companynamedv3077" -Credential "admusername"
+
+# which machines don't have KB3185319?  (if the .txt file doesn't exist, all machines have the KB)
+$A = Get-Content ".\AllMachinesNoSlashes.txt" 
+$A | ForEach { if (!(Get-HotFix -Id "KB3185319" -ComputerName $_)) { Add-Content $_ -Path "Missing-KB3185319.txt" }} 
+
+# append text to the end of each line in a file
+$A = Get-Content ".\AllMachinesNoSlashes.txt"
+$A | foreach {$_ + ".companyname.pod04.cloudprovider.com"}
+
+# convert all upper case to lower
+$b = $A|foreach {$_ + ".companyname.pod04.cloudprovider.com"}
+$c = $b.ToLower()
+echo $c
+
+# get my SID
+$objUser = $objSID.Translate( [System.Security.Principal.NTAccount])
+$strSID = $objUser.Translate([System.Security.Principal.SecurityIdentifier])
+$strSID.Value
+S-1-5-21-2206019-289894443-1507199917-1181
+
+# get username from my SID
+$objSID = New-Object System.Security.Principal.SecurityIdentifier("S-1-5-21-2206019-289894443-1507199917-1181")
+$objUser = $objSID.Translate([System.Security.Principal.NTAccount]) 
+$objUser.Value
+companyname\username
+
+# list installed applications with a name "like"
+Get-WmiObject -Class Win32_Product | Where-Object {$_.Name -like “*Google*”}
+
+# wget URL -Outfile file
+wget https://dl.influxdata.com/kapacitor/releases/kapacitor-1.3.1_windows_amd64.zip -OutFile kapacitor-1.3.1_windows_amd64.zip
+
+# unzip
+# Note that if the target folder doesn't exist, ExtractToDirectory will create it.
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+function Unzip
+{
+    param([string]$zipfile, [string]$outpath)
+
+    [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath)
+}
+
+Unzip "C:\a.zip" "C:\a"
+
+# list all AD users
+Get-ADUser -LDAPFilter '(name=*)' | Ft Name,Surname -AutoSize
+
+# get a count of the same
+Get-ADUser -LDAPFilter '(name=*)' | Ft Name,Surname -AutoSize | measure
+
+# invoke a command on a remote machine
+Invoke-Command -ComputerName 10.5.30.248 -ScriptBlock { Get-ChildItem C:\ } -credential username
+
+# restart RDP services on a remote machine (might only need to restart TermService)
+Invoke-Command -ComputerName 10.5.30.248 -ScriptBlock { Restart-Service TermService,SessionEnv } -credential username
+
+# turn on firewall logging
+netsh advfirewall set currentprofile logging filename %systemroot%\system32\LogFiles\Firewall\pfirewall.log
+netsh advfirewall set currentprofile logging maxfilesize 4096
+netsh advfirewall set currentprofile logging droppedconnections enable
+netsh advfirewall set currentprofile logging allowedconnections enable
+
+# show current connections
+netsh advfirewall monitor show consec
+
+# show port states, protocol, addresses and PID
+netstat -ano
+
+# see if port is open on a machine
+Test-NetConnection -Port 443 -InformationLevel Detailed -ComputerName companynamePRODWEB1.companyname.POD04.cloudprovider.COM
+
+# check if password is expired for account
+get-aduser -identity jenkinsuser -properties *
+
+# if you don't know SamAccountName (e.g. Chris Van Dyke) use 'Name -like'
+get-aduser -filter 'Name -like "*Dyke*"'
+
+# set password
+Set-ADAccountPassword -Identity username -NewPassword (ConvertTo-SecureString -AsPlainText "companyname1234!" -Force)
+
+# du total
+# disk usage
+PS C:\var\lib\influxdb> du -ch . |sls total
+2.6G    total
+
+# network test
+Test-NetConnection -Port 443 -InformationLevel Detailed -ComputerName companynamePRODWEB1.companyname.POD04.cloudprovider.COM
+
+# whatismyip (external IP lookup)
+Invoke-WebRequest ifconfig.me/ip
+
+# count the number of git processes
+(Get-Process -Computer hostname.com -Name 'git').count
+
+# mount an .iso
+Mount-DiskImage -ImagePath C:\Users\username\Downloads\en_sql_server_2016_developer_with_service_pack_1_x64_dvd_9548071.iso
+
+# when was the machine rebooted?
+get-eventlog system | where-object {$_.eventid -eq 6006} | select -first 3
+
+# get Windows product key 
+# our Windows 10 Pro key - 9N3YQ-H6FWB-YXWYB-X4VKJ-7FR9M
+(Get-WmiObject -query 'select * from SoftwareLicensingService').OA3xOriginalProductKey
+
+# see who's logged in
+query user /server:LOCALHOST
+
+# Use Get-EventLog to show Error level entries in the System log
+Get-EventLog -LogName System -EntryType Error -Newest 10
+
+# inverted grep (grep -v) printing all lines not containing BANNED, Checking or Stats
+sls -n BANNED,Checking,Stats .\CrushFTP.log_20170613_000025.log
+
+# see which DC you're connected to via cmd.exe  
+set L 
+# or 
+echo %logonserver%. 
+
+# curl prod.foobar.org (need to force TLS1.2 to avoid "An unexpected error occurred on a send.")
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+Invoke-WebRequest -Uri "https://prod.foobar.org/Account/Login?ReturnUrl=%2f" -Verbose
+
+# get info on dirs
+# save encrypted password to a file
+"myPassword" | ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString | Out-File "C:\EmailPassword.txt"
+
+# del AppData (will not remove files in use)
+Set-Location "C:\Users"
+Remove-Item ".\*\Appdata\Local\Temp\*" -recurse -force
+
+# get du-like info
+Function Format-FileSize() {
+    Param ([int]$size)
+    If     ($size -gt 1TB) {[string]::Format("{0:0.00} TB", $size / 1TB)}
+    ElseIf ($size -gt 1GB) {[string]::Format("{0:0.00} GB", $size / 1GB)}
+    ElseIf ($size -gt 1MB) {[string]::Format("{0:0.00} MB", $size / 1MB)}
+    ElseIf ($size -gt 1KB) {[string]::Format("{0:0.00} kB", $size / 1KB)}
+    ElseIf ($size -gt 0)   {[string]::Format("{0:0.00} B", $size)}
+    Else                   {""}
+}
+
+Get-ChildItem | Select-Object Name, @{Name="Size";Expression={Format-FileSize($_.Length)}}
+
+# execution policies for .ps1 files
+Get-ExecutionPolicy
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+
+# see who's logged in
+query user
+
+# good resource for working with perfmon values in PS
+https://www.simple-talk.com/sql/database-administration/gathering-perfmon-data-with-powershell/
+
+# discover what you can act on with Get-Counter on the Processor object
+(Get-Counter -ListSet Processor).Paths 
+
+# get processor total divided by processor time every 10s until 6 values have been collected
+Get-Counter -counter "\Processor(_Total)\% Processor Time” –SampleInterval 10 –MaxSamples 6
+
+# from companyname-BUILD, use PSTools to run one command on many machines
+C:\DeployTools\PSTools\PsService.exe \\companyname-DEV start sensu-client
+
+# empty c:\ recycle bin for all users (rd is an alias for rmdir)
+rd /s c:\$Recycle.Bin
+
+# get uptime
+Get-CimInstance -ClassName win32_operatingsystem | select csname, lastbootuptime
+
+# create a large, random file (as large as a Test .bak file)
+fsutil file createnew dummy_random_file.bak 6564528640
+
+# if `java -version` doesn't work, use this to
+# get java version (works on laptop)
+dir "HKLM:\SOFTWARE\JavaSoft\Java Runtime Environment"  | select -expa pschildname -Last 1
+
+# get java version (works on server)
+dir "HKLM:\SOFTWARE\Wow6432Node\JavaSoft\Java Runtime Environment"  | select -expa pschildname -Last 1
+
+# use cmd.exe to map a network drive
+net use M: \\192.168.1.120\steve /Persistent:Yes
+
+# find
+Get-ChildItem [startpath] -Recurse -Name
+
+# get hostname
+$env:computername
+
+# test whether the WinRM service is running on a local or remote computer 
+Test-WSMan -ComputerName $env:COMPUTERNAME
+
+# beginning of line in powershell on mac is fn left arrow (end of line is fn right arrow)
+# ctrl-r behavior can be accomplished by typing the first few letters of the command followed by F8
+# cat command is the same :)
+
+# in cmd.exe use sc
+sc create sensu-client start= delayed-auto binPath= c:\opt\sensu\bin\sensu-client.exe DisplayName= "Sensu Client"
+
+# in powershell use sc.exe
+sc.exe create sensu-client start= delayed-auto binPath= c:\opt\sensu\bin\sensu-client.exe DisplayName= "Sensu Client"
+
+# use 'interrogate' for 'service foo status'
+sc.exe interrogate sensu-client
+
+# use Select-String to grep for a pattern in a file (in this case, 389 exists in 389.ps1)
+Select-String -Path C:\Users\Administrator\Documents\*.ps1 -Pattern "389"
+
+389.ps1:3:  $tcp.connect("localhost",389)
+
+# use Select-String with -NotMatch to display lines not matching a pattern
+Select-String -Path C:\Users\Administrator\Documents\*.log -Pattern "Percent completed" -NotMatch
+
+# exact match with Select-String
+# for example to find line starting with [[inputs.disk]] in telegraf.conf
+sls '^\[\[inputs.disk' .\telegraf.conf
+telegraf.conf:238:[[inputs.disk]]
+
+# grep for the word true in the file sensu with word count
+sls true .\sensu |Measure-Object -Line
+
+# use Windows PowerShell ISE (Integrated Scripting Environment) to write, test and debug scripts in a single window.
+Start --> Run --> PowerShell ISE
+
+# for 'head' and 'tail' use Get-Content
+# e.g. first 10 lines
+gc -head 10 .\SSMS-Setup-ENU_20170418193003.log
+# e.g. last 10 lines
+gc -tail 10 .\SSMS-Setup-ENU_20170418193003.log 
+
+# diff
+Compare-Object $(Get-Content C:\telegraf\telegraf.conf) $(Get-Content C:\Users\username\telegrafweb1.conf)
+
+# FQDN
+"$env:computername.$env:userdnsdomain"
+
+# FQDN and external IP
+"$env:computername.$env:userdnsdomain" ; (Invoke-WebRequest ifconfig.me/ip).Content
+
+# FQDN of remote machine
+[System.Net.Dns]::GetHostByName("companynamePRODDBBACK")
+
+# get info about the box e.g. num processors
+Set-Location HKLM:
+Get-ChildItem "SYSTEM\CurrentControlSet\Control\Session Manager"
+
+# grep-like behavior of the above
+Get-ChildItem "SYSTEM\CurrentControlSet\Control\Session Manager" |findstr -i Proc
+
+# find large .msi files
+Get-ChildItem c:\*.msi -Recurse | Where-Object {$_.Length -gt 100MB}
+
+# create an alias called hf, then remove it.  notice this alias doesn't work...
+New-Alias hf "h |findstr -i"                                                                                           
+Remove-Item Alias:\hf
+
+# setup Powershell history
+$HistoryFilePath = Join-Path ([Environment]::GetFolderPath('UserProfile')) ._history
+Register-EngineEvent PowerShell.Exiting -Action { Get-History | Export-Clixml $HistoryFilePath } | out-null
+if (Test-path $HistoryFilePath) { Import-Clixml $HistoryFilePath | Add-History }
+# if you don't already have this configured...
+Set-PSReadlineKeyHandler -Key UpArrow -Function HistorySearchBackward
+Set-PSReadlineKeyHandler -Key DownArrow -Function HistorySearchForward
